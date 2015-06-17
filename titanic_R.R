@@ -100,7 +100,8 @@ test <- combi[892:1309,]
 #####################
 # Decision Tree model
 library(rpart)
-fit <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Fare2 + Title + FamSize + Embarked, data = train, method = 'class')
+fit <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Fare2 + 
+                     Title + FamSize + Embarked, data = train, method = 'class')
 
 # Use fit model on test set
 Prediction <- predict(fit, test, type = 'class')
@@ -127,9 +128,7 @@ for (i in 1:891){
 # run this on the test set
 # write to .csv
 
-#####################
-# Random Forests Model (NA's removed as above)
-library(randomForest)
+
 
 
 
