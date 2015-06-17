@@ -1,6 +1,7 @@
 #####################
 # Random Forests Model (NA's removed as above)
 library(randomForest)
+setwd("/Users/williammcdonald/Github/Kaggle_Titanic")
 
 titanic_train <- read.csv("~/Github/Kaggle_Titanic/Data/train.csv")
 titanic_test <- read.csv("~/Github/Kaggle_Titanic/Data/test.csv")
@@ -32,6 +33,8 @@ all_data$Title[all_data$Title %in% c('Miss', 'Mlle', 'Ms')] <- 'Miss'
 all_data$Title[all_data$Title %in% c('Mrs', 'Dona', 'Lady', 'Mme', 'the Countess')] <- 'Lady'
 all_data$Title[all_data$Title %in% c('Capt','Col' ,'Don', 'Dr', 'Jonkheer','Major', 
                                      'Mr', 'Rev', 'Sir')] <- 'Sir'
+# Convert Title to Factors for Random Forests Model 
+all_data$Title <- as.factor(all_data$Title)
 table(all_data$Title)
 
 # Model Age
@@ -47,6 +50,7 @@ test <- all_data[892:1309,]
 set.seed(111)
 
 # Apply the Random Forest Algorithm
+
 my_forest <- randomForest(as.factor(Survived) ~ Pclass + Sex + Age + SibSp + Parch + Fare + 
                                   Embarked + Title, data = train, importance = TRUE, ntree = 1000 )
 # Make your prediction using the test set
