@@ -1,5 +1,5 @@
 # Load Data
-titanic_train <- read.csv("~/Github/Kaggle_Titanic/Data/test.csv")
+titanic_train <- read.csv("~/Github/Kaggle_Titanic/Data/train.csv")
 titanic_test <- read.csv("~/Github/Kaggle_Titanic/Data/test.csv")
 # Data Exploration
 str(titanic_train)
@@ -43,9 +43,9 @@ combi$Title <- sub(' ', '', combi$Title)
 table(combi$Title)
 
 # Combine
-combi$Title[combi$Title %in% c('Capt','Col' ,'Don', 'Dr', 'Jonkheer','Major', 'Mr', 'Rev', 'Sir')] <- 'Sir'
-combi$Title[combi$Title %in% c('Mrs', 'Dona', 'Lady', 'Mme', 'the Countess')] <- 'Lady'
-combi$Title[combi$Title %in% c('Miss', 'Mlle', 'Ms')] <- 'Miss'
+combi$Title2[combi$Title %in% c('Capt','Col' ,'Don', 'Dr', 'Jonkheer','Major', 'Mr', 'Rev', 'Sir')] <- 'Sir'
+combi$Title2[combi$Title %in% c('Mrs', 'Dona', 'Lady', 'Mme', 'the Countess')] <- 'Lady'
+combi$Title2[combi$Title %in% c('Miss', 'Mlle', 'Ms')] <- 'Miss'
 
 # Assign all NA's to the median or the mean
 # titanic$Age[is.na(titanic$Age) == T] <- 29.7 # does not appear to  add to model
@@ -90,6 +90,8 @@ combi$Fare2[combi$Fare < 30] <- '20-30'
 combi$Fare2[combi$Fare < 20] <- '10-20'
 combi$Fare2[combi$Fare < 10] <- '<10'
 
+combi$Fare3 <- log(combi$Fare +1)
+
 # Addtional Features ???
 # 
 
@@ -100,8 +102,8 @@ test <- combi[892:1309,]
 #####################
 # Decision Tree model
 library(rpart)
-fit <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Fare2 + 
-                     Title + FamSize + Embarked, data = train, method = 'class')
+fit <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Fare2 + Fare3 +
+                     Title + Title2 + FamSize + Embarked, data = train, method = 'class')
 
 # Use fit model on test set
 Prediction <- predict(fit, test, type = 'class')
@@ -110,7 +112,7 @@ Prediction <- predict(fit, test, type = 'class')
 submit <- data.frame(PassengerId = test$PassengerId, Survived = Prediction)
 
 # Write to csv
-write.csv(submit, file = "myfirstdtree.csv", row.names = FALSE)
+write.csv(submit, file = "powertree.csv", row.names = FALSE)
 
 install.packages('party')
 library(party)
@@ -129,12 +131,16 @@ for (i in 1:891){
 # write to .csv
 
 
+###################
+# use on tidy_train and tidy_test
 
+titanic_train <- read.csv("~/Github/Kaggle_Titanic/Data/tidy_train.csv")
+titanic_test <- read.csv("~/Github/Kaggle_Titanic/Data/tidy_test.csv")
 
+test_tree <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare2 + Embarked, data = titanic_train, method = "class" )
 
+prediction <- predict(test_tree, titanic_test, "class")
 
-######################
-# GBM Model
-library(caret)
+submit <- data.frame(PassengerId = titanic_test$PassengerId, Survived = prediction)
 
-
+write.csv(submit, file = "tree2.csv", row.names = FALSE)

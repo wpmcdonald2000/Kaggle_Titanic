@@ -19,7 +19,7 @@ all_data$Embarked[c(62, 830)] <- "S"
 
 # Missing Fare, replace with median 
 
-all_data$Fare[1044] <- median(all_data$Fare, ma.rm = TRUE)
+all_data$Fare[1044] <- median(all_data$Fare, na.rm = TRUE)
 
 # Ages
 # use rpart to predict ages of NA's based on formula Age ~ Pclass + Sex + ...
@@ -28,21 +28,30 @@ all_data$Fare[1044] <- median(all_data$Fare, ma.rm = TRUE)
 all_data$Name <- as.character(all_data$Name)
 all_data$Title <- sapply(all_data$Name, FUN=function(x) {strsplit(x, split='[,.]')[[1]][2]})
 all_data$Title <- sub(' ', '', all_data$Title)
-all_data$Title[all_data$Title %in% c('Miss', 'Mlle', 'Ms')] <- 'Miss'
-all_data$Title[all_data$Title %in% c('Mrs', 'Dona', 'Lady', 'Mme', 'the Countess')] <- 'Lady'
-all_data$Title[all_data$Title %in% c('Capt','Col' ,'Don', 'Dr', 'Jonkheer','Major', 
+
+# Two Title variables, All titles and grouped titles
+all_data$Title2[all_data$Title %in% c('Miss', 'Mlle', 'Ms')] <- 'Miss'
+all_data$Title2[all_data$Title %in% c('Mrs', 'Dona', 'Lady', 'Mme', 'the Countess')] <- 'Lady'
+all_data$Title2[all_data$Title %in% c('Capt','Col' ,'Don', 'Dr', 'Jonkheer','Major', 
                                      'Mr', 'Rev', 'Sir')] <- 'Sir'
 # Convert Title to Factors for Random Forests Model 
 all_data$Title <- as.factor(all_data$Title)
 table(all_data$Title)
+all_data$Title2 <- as.factor(all_data$Title2)
+table(all_data$Title2)
 
 # Model Age
-predicted_age <- rpart(Age ~ Pclass + Sex + SibSp + Parch + Fare + Embarked + Title ,
+predicted_age <- rpart(Age ~ Pclass + Sex + SibSp + Parch + Fare + Embarked + Title + Title2 ,
                        data=all_data[!is.na(all_data$Age),], method="anova")
 all_data$Age[is.na(all_data$Age)] <- predict(predicted_age, all_data[is.na(all_data$Age),])
 
 # Fare: handle skewed distribution
 all_data$Fare2 <- log(all_data$Fare +1)
+
+# Variable for Pclass v Age (Older 1st class over younger 2nd or 3rd class)
+all_data$Power <- all_data$Pclass * all_data$Age
+
+
 
 # Split back into Train and Test set
 train <- all_data[1:891,]
